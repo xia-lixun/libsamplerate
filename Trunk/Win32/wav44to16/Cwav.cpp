@@ -62,6 +62,7 @@ size_t Cwav::ExtractMetaInfo(const char * FilePath) {
 		BytesMetaInfo += fread(id, sizeof(uint8_t), 4, f);
 	
 		//if FACT chunck
+		memset(MetaInfo.fact_ckID, '-', sizeof(uint8_t) * 4);
 		if (id[0] == 'f' && id[1] == 'a' && id[2] == 'c' && id[3] == 't') {
 			memcpy(MetaInfo.fact_ckID, id, sizeof(uint8_t) * 4);
 			BytesMetaInfo += fread(&(MetaInfo.fact_cksize),         sizeof(uint32_t), 1, f) * sizeof(uint32_t);
@@ -72,19 +73,26 @@ size_t Cwav::ExtractMetaInfo(const char * FilePath) {
 					BytesMetaInfo += fread(id, sizeof(uint8_t), 1, f);
 				}
 			}
-			BytesMetaInfo += fread(MetaInfo.data_ckID, sizeof(uint8_t), 4, f);
+			BytesMetaInfo += fread(id, sizeof(uint8_t), 4, f);
 		}
-		else if (id[0] == 'd' && id[1] == 'a' && id[2] == 't' && id[3] == 'a'){
-			memset(MetaInfo.fact_ckID, '-', sizeof(uint8_t) * 4);
+
+		while (id[0] != 'd' || id[1] != 'a' || id[2] != 't' || id[3] != 'a') { //unknown chunk that we need to skip
+			BytesMetaInfo += fread(&(MetaInfo.unknown_cksize), sizeof(uint32_t), 1, f) * sizeof(uint32_t);
+			uint8_t ByteSkip;
+			for(uint32_t k = 0; k < MetaInfo.unknown_cksize; ++k)
+				BytesMetaInfo += fread(&ByteSkip, sizeof(uint8_t), 1, f);
+			BytesMetaInfo += fread(id, sizeof(uint8_t), 4, f);
+		}
+
+		if (id[0] == 'd' && id[1] == 'a' && id[2] == 't' && id[3] == 'a'){
 			memcpy(MetaInfo.data_ckID, id, sizeof(uint8_t) * 4);
-			//MetaInfo.fact_cksize not available
-			//MetaInfo.fact_dwSampleLength not available
+
+			//read rest of the DATA chunck
+			BytesMetaInfo += fread(&(MetaInfo.data_cksize), sizeof(uint32_t), 1, f) * sizeof(uint32_t);
 		}
 		else {
 			printf("Header Parse Error!\n");
 		}
-		//read rest of the DATA chunck
-		BytesMetaInfo += fread(&(MetaInfo.data_cksize), sizeof(uint32_t), 1, f) * sizeof(uint32_t);
 		fclose(f);
 
 		//update parameter info
@@ -430,7 +438,7 @@ void Cwav::MakeMetaInfo(int nChannel, int nSampleRate, int nSample, int fmt) {
 
 
 
-size_t Cwav::SaveMetaInfo(char * FilePath) {
+size_t Cwav::SaveMetaInfo(const char * FilePath) {
 
 	size_t BytesWritten = 0;
 	FILE * f;
@@ -469,7 +477,7 @@ size_t Cwav::SaveMetaInfo(char * FilePath) {
 
 
 
-size_t Cwav::Save2File_flt(char * FilePath)
+size_t Cwav::Save2File_flt(const char * FilePath)
 {
 	size_t BytesWritten = 0;
 	MakeMetaInfo(NumChannel, SampleRate, NumFrame, 32);
@@ -490,7 +498,7 @@ size_t Cwav::Save2File_flt(char * FilePath)
 	return BytesWritten;
 }
 
-size_t Cwav::Save2File_16b(char * FilePath)
+size_t Cwav::Save2File_16b(const char * FilePath)
 {
 	size_t BytesWritten = 0;
 	MakeMetaInfo(NumChannel, SampleRate, NumFrame, 16);
@@ -511,7 +519,7 @@ size_t Cwav::Save2File_16b(char * FilePath)
 	return BytesWritten;
 }
 
-size_t Cwav::Save2File_24b(char * FilePath)
+size_t Cwav::Save2File_24b(const char * FilePath)
 {
 	size_t BytesWritten = 0;
 	MakeMetaInfo(NumChannel, SampleRate, NumFrame, 24);
@@ -537,7 +545,7 @@ size_t Cwav::Save2File_24b(char * FilePath)
 
 // the trimmed slice has the same sample rate and number of channels as the input wav file
 // so we don't use channel or sample rate info here
-size_t Cwav::Save2File_16b(char * FilePath, double Start, double Stop) {
+size_t Cwav::Save2File_16b(const char * FilePath, double Start, double Stop) {
 
 	size_t BytesWritten = 0;
 
@@ -568,7 +576,7 @@ size_t Cwav::Save2File_16b(char * FilePath, double Start, double Stop) {
 }
 
 
-size_t Cwav::Save2File_24b(char * FilePath, double Start, double Stop) {
+size_t Cwav::Save2File_24b(const char * FilePath, double Start, double Stop) {
 
 	size_t BytesWritten = 0;
 
@@ -598,7 +606,7 @@ size_t Cwav::Save2File_24b(char * FilePath, double Start, double Stop) {
 }
 
 
-size_t Cwav::Save2File_flt(char * FilePath, double Start, double Stop) {
+size_t Cwav::Save2File_flt(const char * FilePath, double Start, double Stop) {
 
 	size_t BytesWritten = 0;
 	

@@ -34,8 +34,9 @@ typedef struct MetaInfoStruct {
 	uint32_t fact_cksize;
 	uint32_t fact_dwSampleLength; //number of samples per channel
 
-								  //DATA
-	uint8_t data_ckID[4];
+	uint32_t unknown_cksize;
+								  
+	uint8_t data_ckID[4];//DATA
 	uint32_t data_cksize;
 
 } MetaInfo_t;
@@ -62,14 +63,14 @@ public:
 	float * SetFrameMatrix(int nFrame, int nChannel, int nSampleRate); //compose a framematrix from param
 
 	//write framematrix to files with slice param
-	size_t Save2File_flt(char * FilePath, double Start, double Stop);
-	size_t Save2File_16b(char * FilePath, double Start, double Stop);
-	size_t Save2File_24b(char * FilePath, double Start, double Stop);
+	size_t Save2File_flt(const char * FilePath, double Start, double Stop);
+	size_t Save2File_16b(const char * FilePath, double Start, double Stop);
+	size_t Save2File_24b(const char * FilePath, double Start, double Stop);
 
 	//write framematrix to files entirely
-	size_t Save2File_flt(char * FilePath);
-	size_t Save2File_16b(char * FilePath);
-	size_t Save2File_24b(char * FilePath);
+	size_t Save2File_flt(const char * FilePath);
+	size_t Save2File_16b(const char * FilePath);
+	size_t Save2File_24b(const char * FilePath);
 
 
 
@@ -81,7 +82,7 @@ private:
 	size_t ExtractData_flt(const char * FilePath, float * FrameMat);
 
 	void MakeMetaInfo(int nChannel, int nSampleRate, int nSample, int fmt);
-	size_t SaveMetaInfo(char * FilePath);
+	size_t SaveMetaInfo(const char * FilePath);
 
 
 protected:
