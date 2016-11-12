@@ -3,6 +3,7 @@
 #include <cstring>
 #include <cassert>
 #include <iostream>
+#include <cmath>
 #include "Cwav.h"
 #include "Coeffs.h"
 
@@ -11,6 +12,28 @@
 int gcd(int a, int b) {
 	return b == 0 ? a : gcd(b, a % b);
 }
+
+
+double error;
+void reset_accumulate(double& sigma)
+{
+	sigma = 0.0f;
+	error = 0.0f;
+}
+
+void accumulate(double& sigma, double increment)
+{
+	double mInputCompensated;
+	double mSumConverge;
+
+	mInputCompensated = increment - error;
+	mSumConverge = sigma + mInputCompensated;
+	error = (mSumConverge - sigma) - mInputCompensated;
+	sigma = mSumConverge;
+}
+
+
+
 
 
 
@@ -63,6 +86,37 @@ int main(int argc, char *argv[])
 			offset += denorm;
 		}
 		std::cout << count << " frames  [" << (float)count / (float)TARGET_SAMPLE_RATE << " seconds] processed\n";
+
+
+		//find the max(abs(x)) for amplitude normalization
+		double maxima = 0.0;
+		double mabs;
+		double md;
+		double sigma;
+
+		reset_accumulate(sigma);
+		for (const auto& m : w16track)
+		{
+			md = (double)m;
+			accumulate(sigma, md);
+			mabs = abs(md);
+			if (mabs > maxima)
+				maxima = mabs;
+		}
+		sigma = sigma / (double)count;
+		std::cout << "mu:  " << sigma << "  ";
+
+		//calculate gain and application
+		float gain = 0.99 / (maxima + 1e-12);
+		reset_accumulate(sigma);
+		for (auto& m : w16track)
+		{
+			m = m * gain;
+			md = (double)m * (double)m;
+			accumulate(sigma, md);
+		}
+		std::cout << "rms:  " << 20.0 * log10(sqrt(sigma / ((double)count + 1e-12))) << " dB\n";
+
 
 		Cwav w16;
 		float *w16x = w16.SetFrameMatrix((int)count, 1, TARGET_SAMPLE_RATE);
