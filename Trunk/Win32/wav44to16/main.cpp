@@ -18,7 +18,7 @@ int main(int argc, char *argv[])
 {
 	//filter length
 	const size_t FilterLength = sizeof(FirCoeffs) / sizeof(FirCoeffs[0]);
-	
+	std::cout << "sizeof(size_t) = " << sizeof(size_t) << std::endl;
 
 	//source info
 	Cwav w44;
@@ -41,10 +41,10 @@ int main(int argc, char *argv[])
 	std::vector<float> w16track(w16samples);
 	float *w44x = w44.GetFrameMatrix(argv[1]);
 
-	std::cout << "+";
+
 	for (size_t chan = 0; chan < channels; ++chan)
 	{
-		std::cout << chan;
+		std::cout << "channel-" << chan << ":  ";
 
 		//extract the track from interleaved frame matrix	
 		for (size_t i = 0; i < w44samples; ++i)
@@ -57,11 +57,12 @@ int main(int argc, char *argv[])
 		{
 			size_t nn = offset / numera;
 			float pd = 0.f;
-			for (int i = nn; (offset - i*numera < FilterLength) && (i >= 0); --i)
+			for (int64_t i = nn; (offset - i*numera < FilterLength) && (i >= 0); --i)
 				pd += w44track[i] * FirCoeffs[offset - i*numera];
 			w16track[count++] = pd;
 			offset += denorm;
 		}
+		std::cout << count << " frames  [" << (float)count / (float)TARGET_SAMPLE_RATE << " seconds] processed\n";
 
 		Cwav w16;
 		float *w16x = w16.SetFrameMatrix((int)count, 1, TARGET_SAMPLE_RATE);
@@ -71,7 +72,6 @@ int main(int argc, char *argv[])
 		w16.Save2File_flt(path.c_str());
 
 	}
-	std::cout << "+\n";
 
 
 

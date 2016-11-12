@@ -105,14 +105,11 @@ size_t Cwav::ExtractMetaInfo(const char * FilePath) {
 void Cwav::PrintMetaInfo(void) {
 
 	printf("\n");
-	printf("+---------------------------------------------------------------------------------------------------+\n");
-	printf("| EXTENSIBLE FORMAT READ IS SUPPORTED                                                               |\n");
-	printf("| EXTENSIBLE FORMAT WRITE IS NOT SUPPORTED                                                          |\n");
-	printf("+----------------------------------------------RIFF-------------------------------------------------+\n");
+	printf("+------------------------------[RIFF]\n");
 	printf("|ckID                %c%c%c%c\n", MetaInfo.riff_ckID[0], MetaInfo.riff_ckID[1], MetaInfo.riff_ckID[2], MetaInfo.riff_ckID[3]);
 	printf("|cksize              %d\n", MetaInfo.riff_cksize);
 	printf("|WAVEID              %c%c%c%c\n", MetaInfo.riff_waveID[0], MetaInfo.riff_waveID[1], MetaInfo.riff_waveID[2], MetaInfo.riff_waveID[3]);
-	printf("+---------------------------------------------FORMAT------------------------------------------------+\n");
+	printf("+----------------------------[FORMAT]\n");
 	printf("|ckID                %c%c%c%c\n", MetaInfo.fmt_ckID[0], MetaInfo.fmt_ckID[1], MetaInfo.fmt_ckID[2], MetaInfo.fmt_ckID[3]);
 	printf("|cksize              %d\n", MetaInfo.fmt_cksize);
 	printf("|wFormatTag          %x\n", MetaInfo.fmt_wFormatTag);
@@ -142,7 +139,7 @@ void Cwav::PrintMetaInfo(void) {
 		printf("|dwChannelMask       -\n");
 		printf("|SubFormat           -\n");
 	}
-	printf("+----------------------------------------------FACT-------------------------------------------------+\n");
+	printf("+------------------------------[FACT]\n");
 	printf("|ckID                %c%c%c%c\n", MetaInfo.fact_ckID[0], MetaInfo.fact_ckID[1], MetaInfo.fact_ckID[2], MetaInfo.fact_ckID[3]);
 	if (MetaInfo.fact_ckID[0] == '-') {
 		printf("|cksize              -\n");
@@ -152,10 +149,10 @@ void Cwav::PrintMetaInfo(void) {
 		printf("|cksize              %d\n", MetaInfo.fact_cksize);
 		printf("|dwSampleLength      %d\n", MetaInfo.fact_dwSampleLength);
 	}
-	printf("+----------------------------------------------DATA-------------------------------------------------+\n");
+	printf("+------------------------------[DATA]\n");
 	printf("|ckID                %c%c%c%c\n", MetaInfo.data_ckID[0], MetaInfo.data_ckID[1], MetaInfo.data_ckID[2], MetaInfo.data_ckID[3]);
 	printf("|cksize              %d\n", MetaInfo.data_cksize);
-	printf("+---------------------------------------------------------------------------------------------------+\n");
+	printf("+-------------------------------[END]\n");
 }
 
 
@@ -206,7 +203,7 @@ size_t Cwav::ExtractData_flt(const char * FilePath, float * FrameMat) {
 
 	fclose(f);
 	delete[] EachFrame;
-	printf("total: %d bytes\n", BytesTotal);
+	printf("total: %zd bytes\n", BytesTotal);
 	return BytesTotal;
 }
 
@@ -243,7 +240,7 @@ size_t Cwav::ExtractData_16b(const char * FilePath, float * FrameMat) {
 	fclose(f);
 	delete[] EachFrame;
 	delete[] Sample;
-	printf("total: %d bytes\n", BytesTotal);
+	printf("total: %zd bytes\n", BytesTotal);
 	return BytesTotal;
 }
 
@@ -303,7 +300,7 @@ float * Cwav::GetFrameMatrix(const char * FilePath) {
 		return NULL;	
 	}
 	size_t MetaInfoBytesAll = ExtractMetaInfo(FilePath);
-	printf("wav header: %d bytes\n", MetaInfoBytesAll);
+	printf("wav header: %zd bytes\n", MetaInfoBytesAll);
 	//PrintMetaInfo();
 	
 
@@ -344,7 +341,7 @@ float * Cwav::GetFrameMatrix(const char * FilePath) {
 	else {
 		printf("Read Error: A-Law / u-Law not supported: %x \n", MetaInfo.fmt_wFormatTag);
 	}
-	printf("bytes read from file: %ld\n", BytesRead);
+	printf("bytes read from file: %zd\n", BytesRead);
 	return FrameMatrix;
 }
 
