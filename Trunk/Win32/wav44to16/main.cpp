@@ -4,8 +4,13 @@
 #include <cassert>
 #include <iostream>
 #include <cmath>
+#include <windows.h>
+
 #include "Cwav.h"
 #include "Coeffs.h"
+
+
+//w44to16.exe speech_micarray_n8_44k.wav "D:\\Cortana\\Input\\"
 
 
 
@@ -42,6 +47,8 @@ int main(int argc, char *argv[])
 	//filter length
 	const size_t FilterLength = sizeof(FirCoeffs) / sizeof(FirCoeffs[0]);
 	std::cout << "sizeof(size_t) = " << sizeof(size_t) << std::endl;
+	std::string DestRoot(argv[2]);
+
 
 	//source info
 	Cwav w44;
@@ -122,9 +129,11 @@ int main(int argc, char *argv[])
 		float *w16x = w16.SetFrameMatrix((int)count, 1, TARGET_SAMPLE_RATE);
 		memcpy(w16x, &w16track[0], sizeof(float) * count);
 		
-		std::string path("MicIn_" + std::to_string(chan) + ".wav");
+		std::string DestPath(DestRoot + "CH" + std::to_string(chan) + "\\");
+		CreateDirectory(DestPath.c_str(), NULL);
+		std::string path(DestPath + "MicIn.wav");
+		
 		w16.Save2File_flt(path.c_str());
-
 	}
 
 
