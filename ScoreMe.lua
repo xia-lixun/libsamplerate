@@ -10,9 +10,11 @@
 --+++++++++++++
 --users params+
 --+++++++++++++
-DataPath = "Z:\\20161111\\"
+DataPath = "Z:\\20160000\\"
 CortanaInputPath = "C:\\Cortana\\Input\\"
 CortanaScorePath = "C:\\Cortana\\Score\\"
+Unscaled = false
+
 
 --+++++++++++++
 --resource    +
@@ -42,8 +44,12 @@ for i=1,#task do
 	os.execute("del /f /q " .. CortanaScorePath .. "Output\\ScoreResults\\*.txt")
 	os.execute("rmdir /s /q " .. CortanaInputPath)
 	os.execute("mkdir " .. CortanaInputPath)
-
-	os.execute("wav44to16.exe " .. task[i] .. " " .. CortanaInputPath)
+	
+	if Unscaled then
+		os.execute("wav44to16.exe " .. task[i] .. " " .. CortanaInputPath .. " unscaled")
+	else
+		os.execute("wav44to16.exe " .. task[i] .. " " .. CortanaInputPath)
+	end
 	os.execute("score " .. CortanaInputPath)
 
 	--how to collect score results?
