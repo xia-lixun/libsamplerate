@@ -48,6 +48,7 @@ int main(int argc, char *argv[])
 	const size_t FilterLength = sizeof(FirCoeffs) / sizeof(FirCoeffs[0]);
 	std::cout << "sizeof(size_t) = " << sizeof(size_t) << std::endl;
 	std::string DestRoot(argv[2]);
+	bool unscaled = (argc > 3) ? true : false;
 
 
 	//source info
@@ -76,9 +77,12 @@ int main(int argc, char *argv[])
 	{
 		std::cout << "channel-" << chan << ":  ";
 
-		//extract the track from interleaved frame matrix	
-		for (size_t i = 0; i < w44samples; ++i)
+		//extract the track from interleaved frame matrix
+		for (size_t i = 0; i < w44samples; ++i) 
+		{
 			w44track[i] = w44x[i*channels + chan];
+		}
+
 
 		//apply filtering to w44track and store the result to w16track
 		size_t count = 0;
@@ -100,7 +104,10 @@ int main(int argc, char *argv[])
 		double mabs;
 		double md;
 		double sigma;
+		float gain;
 
+
+		//find mu and peak of the w16 track
 		reset_accumulate(sigma);
 		for (const auto& m : w16track)
 		{
@@ -113,8 +120,15 @@ int main(int argc, char *argv[])
 		sigma = sigma / (double)count;
 		std::cout << "mu:  " << sigma << "  ";
 
+
 		//calculate gain and application
-		float gain = 0.99 / (maxima + 1e-12);
+		if (unscaled)
+			gain = 1.f;
+		else
+			gain = 0.99 / (maxima + 1e-12);
+		
+
+		//apply gain and calculate rms value
 		reset_accumulate(sigma);
 		for (auto& m : w16track)
 		{
