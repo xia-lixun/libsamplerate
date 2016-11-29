@@ -73,7 +73,8 @@ int main(int argc, char *argv[])
 	std::vector<float> w44track(w44samples);
 	std::vector<float> w16track(w16samples);
 	float *w44x = w44.GetFrameMatrix(argv[1]);
-
+	double pd;
+	
 
 	for (size_t chan = 0; chan < channels; ++chan)
 	{
@@ -92,10 +93,12 @@ int main(int argc, char *argv[])
 		while (offset < w44samples * numera)
 		{
 			size_t nn = offset / numera;
-			float pd = 0.f;
+			//float pd = 0.f;
+			reset_accumulate(pd);
 			for (int64_t i = nn; (offset - i*numera < FilterLength) && (i >= 0); --i)
-				pd += w44track[i] * FirCoeffs[offset - i*numera];
-			w16track[count++] = pd;
+				accumulate(pd, (double)w44track[i] * FirCoeffs[offset - i*numera]);
+				//pd += w44track[i] * FirCoeffs[offset - i*numera];
+			w16track[count++] = (float)pd;
 			offset += denorm;
 		}
 		std::cout << count << " frames  [" << (float)count / (float)TARGET_SAMPLE_RATE << " seconds] processed\n";
@@ -104,10 +107,9 @@ int main(int argc, char *argv[])
 		//find the max(abs(x)) for amplitude normalization
 		double maxima = 0.0;
 		double mabs;
-		double md;
-		double sigma;
 		float gain;
-
+		double sigma;
+		double md;
 
 		//find mu and peak of the w16 track
 		reset_accumulate(sigma);
@@ -127,7 +129,7 @@ int main(int argc, char *argv[])
 		if (unscaled)
 			gain = 1.f;
 		else
-			gain = 0.99 / (maxima + 1e-12);
+			gain = (float)(0.99 / (maxima + 1e-12));
 		
 
 		//apply gain and calculate rms value

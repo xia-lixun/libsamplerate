@@ -1,5 +1,7 @@
 #pragma once
 
+
+
 #include <cstdbool>
 #include <cinttypes>
  
@@ -48,6 +50,7 @@ typedef struct MetaInfoStruct {
 // (b) Cwav b; b.SetFrameMatrix(1*fs, 2, 44100); f(FrameMatrix); Save2File_XXX();
 class Cwav
 {
+
 public:
 	Cwav();
 	virtual ~Cwav();
