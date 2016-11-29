@@ -11,7 +11,9 @@
 
 
 //w44to16.exe speech_micarray_n8_44k.wav "D:\\Cortana\\Input\\"
-
+//@todo: use compensated accumulation for inner product
+//@todo: if input is @16000Hz, use pass-through
+//@todo: if input is @48000Hz, use 3:1 filter
 
 
 int gcd(int a, int b) {
